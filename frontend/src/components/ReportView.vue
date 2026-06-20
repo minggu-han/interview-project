@@ -72,10 +72,13 @@
 </template>
 
 <script setup>
+// 报告展示组件（纯展示，数据由父组件传入）：
+// 综合分、AI 总评与录用建议、优缺点、各技术点掌握度进度条、各题详情。
 defineProps({
-  report: { type: Object, default: null },
+  report: { type: Object, default: null },     // 报告数据，null 时显示 loadingText
   loadingText: { type: String, default: '加载中...' },
 })
+// 根据分值返回进度条/分数颜色：≥75 绿、≥50 橙、否则红
 function bar(v) {
   if (v >= 75) return '#16a34a'
   if (v >= 50) return '#f59e0b'

@@ -49,6 +49,11 @@ async def lifespan(app: FastAPI):
 
 
 # uv run uvicorn app.main:app --reload --port 8002
+#构建镜像：docker build -t interview-backend:20260620-001 .
+#运行容器并映射端口：docker run -p 8002:8002 interview-backend:20260620-001
+#或者
+#docker-compose.yml文件部署 docker compose up -d
+#之后可通过 http://localhost:8002 访问你的 API 服务。
 app = FastAPI(title="智能面试系统", version="1.0.0", lifespan=lifespan)
 
 app.add_middleware(

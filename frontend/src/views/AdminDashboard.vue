@@ -94,20 +94,22 @@
 </template>
 
 <script setup>
+// 管理后台：添加面试者（自动生成登录账号）、查看面试者列表、查看报告、重置密码。
 import { ref, nextTick, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../api'
 
 const router = useRouter()
 const username = localStorage.getItem('username')
+// 添加面试者的表单。skills 为技能标签数组，num_questions 控制 AI 出题数量
 const form = ref({ name: '', position: '', seniority: '', email: '', phone: '', skills: [], num_questions: 5, notes: '' })
 const skillInput = ref('')
 const creating = ref(false)
-// 从 sessionStorage 恢复，避免跳转到报告页再返回后账号信息丢失
+// 最近一次创建返回的账号密码。从 sessionStorage 恢复，避免跳转到报告页再返回后账号信息丢失
 const created = ref(JSON.parse(sessionStorage.getItem('lastCreated') || 'null'))
 const candidates = ref([])
 
-// 添加技能弹框
+// ——— 添加技能弹框 ———
 const showSkillModal = ref(false)
 const skillInputEl = ref(null)
 
@@ -115,18 +117,19 @@ async function openSkillModal() {
   skillInput.value = ''
   showSkillModal.value = true
   await nextTick()
-  skillInputEl.value?.focus()
+  skillInputEl.value?.focus() // 弹框渲染后自动聚焦输入框
 }
 function closeSkillModal() {
   showSkillModal.value = false
 }
 function confirmSkill() {
-  const v = skillInput.value.trim().replace(/[,，]/g, '')
+  const v = skillInput.value.trim().replace(/[,，]/g, '') // 去掉中英文逗号，避免一次混入多个
   if (!v) { alert('请输入技能'); return }
-  if (!form.value.skills.includes(v)) form.value.skills.push(v)
+  if (!form.value.skills.includes(v)) form.value.skills.push(v) // 去重后加入标签
   showSkillModal.value = false
 }
 
+// 创建面试者：后端会自动建账号、建面试，并在后台异步出题
 async function createCandidate() {
   if (!form.value.name.trim() || !form.value.position.trim()) {
     alert('请填写姓名和面试岗位')
@@ -141,8 +144,10 @@ async function createCandidate() {
   created.value = null
   try {
     const { data } = await api.post('/api/admin/candidates', form.value)
+    // 返回的账号密码明文仅展示一次，持久化到 sessionStorage 以防误操作丢失
     created.value = data
     sessionStorage.setItem('lastCreated', JSON.stringify(data))
+    // 重置表单并刷新列表
     form.value = { name: '', position: '', seniority: '', email: '', phone: '', skills: [], num_questions: 5, notes: '' }
     await loadCandidates()
   } catch (e) {
@@ -152,6 +157,7 @@ async function createCandidate() {
   }
 }
 
+// 关闭账号展示卡片（确认已记录账号密码后）
 function dismissCreated() {
   created.value = null
   sessionStorage.removeItem('lastCreated')
@@ -162,11 +168,13 @@ async function loadCandidates() {
   candidates.value = data
 }
 
+// 查看报告：先查该面试者最新一场面试拿到 interviewId，再跳到报告页
 async function viewReport(c) {
   const { data } = await api.get(`/api/admin/candidates/${c.id}/interview`)
   router.push(`/admin/report/${data.id}`)
 }
 
+// 重置密码：后端生成新随机密码并返回明文
 async function resetPw(c) {
   if (!confirm(`确定重置 ${c.name} 的密码？`)) return
   const { data } = await api.post(`/api/admin/candidates/${c.id}/reset-password`)
@@ -179,5 +187,5 @@ function logout() {
   router.push('/login')
 }
 
-onMounted(loadCandidates)
+onMounted(loadCandidates) // 进入后台即加载面试者列表
 </script>

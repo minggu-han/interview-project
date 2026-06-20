@@ -9,6 +9,7 @@
 </template>
 
 <script setup>
+// 管理员报告页：根据路由参数 interviewId 拉取报告，交给 ReportView 组件渲染。
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '../api'
@@ -23,6 +24,7 @@ onMounted(async () => {
     const { data } = await api.get(`/api/admin/interviews/${route.params.interviewId}/report`)
     report.value = data
   } catch (e) {
+    // 404 多为面试者尚未完成答题、报告还没生成
     loadingText.value = e.response?.data?.detail || '报告尚未生成（面试者可能还未完成答题）'
   }
 })
