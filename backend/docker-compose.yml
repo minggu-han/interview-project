@@ -4,13 +4,13 @@ services:
   # 应用服务
   app:
     build: .
-    container_name: interview-backend
-    image: interview-backend:20260620-001
+    container_name: python-interview
+    image: python-interview:20260623-001
     ports:
       - "8002:8002"
     environment:
       # 使用你已部署的 PostgreSQL 地址（宿主机IP或容器网络地址）
-      DATABASE_URL: postgresql+asyncpg://snowhan:Msi60067710@host.docker.internal:5432/security-db
+      DATABASE_URL: postgresql+asyncpg://mcp:mcp@172.18.1.76:5432/mcp
       # 如果有其他环境变量，在这里添加
       # LLM_MODEL: gpt-4o-mini
       # OPENAI_API_KEY: your-key-here
